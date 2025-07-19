@@ -1,0 +1,1151 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ultra Premium AI Chat</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-primary: #0a0a0f;
+            --bg-secondary: #1a1a2e;
+            --bg-tertiary: #16213e;
+            --accent-violet: #6c5ce7;
+            --accent-blue: #74b9ff;
+            --accent-light-blue: #a8e6cf;
+            --text-primary: #ffffff;
+            --text-secondary: #b2bec3;
+            --text-muted: #636e72;
+            --border-primary: rgba(108, 92, 231, 0.3);
+            --border-secondary: rgba(116, 185, 255, 0.2);
+            --shadow-violet: rgba(108, 92, 231, 0.4);
+            --shadow-blue: rgba(116, 185, 255, 0.3);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: radial-gradient(ellipse at top, var(--bg-secondary) 0%, var(--bg-primary) 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+            position: relative;
+        }
+
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: 
+                radial-gradient(circle at 20% 30%, var(--accent-violet) 0%, transparent 50%),
+                radial-gradient(circle at 80% 70%, var(--accent-blue) 0%, transparent 50%),
+                radial-gradient(circle at 50% 50%, var(--accent-light-blue) 0%, transparent 70%);
+            opacity: 0.03;
+            z-index: -1;
+        }
+
+        .neural-network {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+            opacity: 0.1;
+        }
+
+        .chat-container {
+            width: 98vw;
+            max-width: 1400px;
+            height: 96vh;
+            background: linear-gradient(145deg, 
+                rgba(26, 26, 46, 0.9) 0%, 
+                rgba(22, 33, 62, 0.8) 50%, 
+                rgba(10, 10, 15, 0.95) 100%);
+            backdrop-filter: blur(40px);
+            border-radius: 32px;
+            border: 1px solid var(--border-primary);
+            display: flex;
+            overflow: hidden;
+            box-shadow: 
+                0 40px 100px rgba(0, 0, 0, 0.7),
+                inset 0 1px 0 rgba(255, 255, 255, 0.1),
+                0 0 100px var(--shadow-violet);
+            position: relative;
+            animation: containerGlow 4s ease-in-out infinite alternate;
+        }
+
+        @keyframes containerGlow {
+            0% { box-shadow: 0 40px 100px rgba(0, 0, 0, 0.7), inset 0 1px 0 rgba(255, 255, 255, 0.1), 0 0 100px var(--shadow-violet); }
+            100% { box-shadow: 0 40px 100px rgba(0, 0, 0, 0.7), inset 0 1px 0 rgba(255, 255, 255, 0.1), 0 0 120px var(--shadow-blue); }
+        }
+
+        .sidebar {
+            width: 340px;
+            background: linear-gradient(180deg, 
+                rgba(22, 33, 62, 0.9) 0%, 
+                rgba(16, 21, 46, 0.95) 100%);
+            border-right: 1px solid var(--border-primary);
+            display: flex;
+            flex-direction: column;
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
+        }
+
+        .sidebar::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(45deg, transparent 30%, var(--accent-violet) 50%, transparent 70%);
+            opacity: 0.02;
+        }
+
+        .sidebar-header {
+            padding: 32px 28px;
+            border-bottom: 1px solid var(--border-secondary);
+            position: relative;
+        }
+
+        .sidebar-title {
+            color: var(--text-primary);
+            font-size: 22px;
+            font-weight: 800;
+            margin-bottom: 16px;
+            background: linear-gradient(135deg, var(--accent-violet), var(--accent-blue));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .new-chat-btn {
+            background: linear-gradient(135deg, var(--accent-violet) 0%, var(--accent-blue) 100%);
+            border: none;
+            color: white;
+            padding: 16px 24px;
+            border-radius: 16px;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 14px;
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            width: 100%;
+            position: relative;
+            overflow: hidden;
+            box-shadow: 0 8px 32px var(--shadow-violet);
+        }
+
+        .new-chat-btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+            transition: left 0.6s;
+        }
+
+        .new-chat-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 16px 48px var(--shadow-violet);
+        }
+
+        .new-chat-btn:hover::before {
+            left: 100%;
+        }
+
+        .chat-history {
+            flex: 1;
+            overflow-y: auto;
+            padding: 20px;
+        }
+
+        .chat-history::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        .chat-history::-webkit-scrollbar-track {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 3px;
+        }
+
+        .chat-history::-webkit-scrollbar-thumb {
+            background: var(--accent-violet);
+            border-radius: 3px;
+        }
+
+        .chat-item {
+            background: rgba(255, 255, 255, 0.03);
+            padding: 16px 20px;
+            border-radius: 16px;
+            margin-bottom: 12px;
+            color: var(--text-secondary);
+            cursor: pointer;
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            border: 1px solid transparent;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .chat-item::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 0;
+            height: 100%;
+            background: linear-gradient(90deg, var(--accent-violet), var(--accent-blue));
+            transition: width 0.4s ease;
+        }
+
+        .chat-item:hover {
+            background: rgba(255, 255, 255, 0.08);
+            border-color: var(--border-primary);
+            transform: translateX(8px);
+            box-shadow: 0 8px 32px rgba(108, 92, 231, 0.2);
+        }
+
+        .chat-item:hover::before {
+            width: 4px;
+        }
+
+        .chat-item.active {
+            background: linear-gradient(135deg, rgba(108, 92, 231, 0.15), rgba(116, 185, 255, 0.1));
+            border-color: var(--accent-violet);
+            color: var(--text-primary);
+        }
+
+        .main-chat {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            position: relative;
+        }
+
+        .chat-header {
+            background: linear-gradient(135deg, 
+                rgba(22, 33, 62, 0.8) 0%, 
+                rgba(26, 26, 46, 0.6) 100%);
+            padding: 24px 40px;
+            border-bottom: 1px solid var(--border-secondary);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            backdrop-filter: blur(20px);
+        }
+
+        .chat-title {
+            color: var(--text-primary);
+            font-size: 24px;
+            font-weight: 800;
+            background: linear-gradient(135deg, var(--accent-violet), var(--accent-light-blue));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .chat-controls {
+            display: flex;
+            gap: 12px;
+        }
+
+        .control-btn {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid var(--border-secondary);
+            color: var(--text-secondary);
+            padding: 12px 18px;
+            border-radius: 12px;
+            cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            font-weight: 500;
+            backdrop-filter: blur(10px);
+        }
+
+        .control-btn:hover {
+            background: rgba(108, 92, 231, 0.2);
+            border-color: var(--accent-violet);
+            color: var(--text-primary);
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(108, 92, 231, 0.3);
+        }
+
+        .messages-container {
+            flex: 1;
+            overflow-y: auto;
+            padding: 40px;
+            display: flex;
+            flex-direction: column;
+            gap: 24px;
+            position: relative;
+        }
+
+        .messages-container::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        .messages-container::-webkit-scrollbar-track {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 4px;
+        }
+
+        .messages-container::-webkit-scrollbar-thumb {
+            background: linear-gradient(180deg, var(--accent-violet), var(--accent-blue));
+            border-radius: 4px;
+        }
+
+        .message {
+            display: flex;
+            align-items: flex-start;
+            gap: 20px;
+            opacity: 0;
+            animation: messageSlideIn 0.6s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+        }
+
+        @keyframes messageSlideIn {
+            from {
+                opacity: 0;
+                transform: translateY(30px) scale(0.95);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0) scale(1);
+            }
+        }
+
+        .message.user {
+            flex-direction: row-reverse;
+        }
+
+        .message-avatar {
+            width: 48px;
+            height: 48px;
+            border-radius: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            font-size: 14px;
+            flex-shrink: 0;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .user-avatar {
+            background: linear-gradient(135deg, var(--accent-blue), var(--accent-light-blue));
+            color: var(--bg-primary);
+            box-shadow: 0 8px 32px var(--shadow-blue);
+        }
+
+        .ai-avatar {
+            background: linear-gradient(135deg, var(--accent-violet), var(--accent-blue));
+            color: white;
+            box-shadow: 0 8px 32px var(--shadow-violet);
+        }
+
+        .message-avatar::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: linear-gradient(45deg, transparent, rgba(255, 255, 255, 0.1), transparent);
+            animation: avatarShimmer 3s infinite;
+        }
+
+        @keyframes avatarShimmer {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .message-content {
+            max-width: 65%;
+            padding: 20px 28px;
+            border-radius: 24px;
+            position: relative;
+            line-height: 1.7;
+            font-weight: 400;
+            backdrop-filter: blur(20px);
+            transition: all 0.3s ease;
+        }
+
+        .user .message-content {
+            background: linear-gradient(135deg, 
+                rgba(108, 92, 231, 0.9) 0%, 
+                rgba(116, 185, 255, 0.8) 100%);
+            color: white;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            box-shadow: 0 16px 40px rgba(108, 92, 231, 0.3);
+        }
+
+        .ai .message-content {
+            background: linear-gradient(135deg, 
+                rgba(255, 255, 255, 0.08) 0%, 
+                rgba(255, 255, 255, 0.05) 100%);
+            color: var(--text-primary);
+            border: 1px solid var(--border-secondary);
+            box-shadow: 0 16px 40px rgba(0, 0, 0, 0.2);
+        }
+
+        .message-content:hover {
+            transform: translateY(-2px);
+        }
+
+        .message-time {
+            font-size: 11px;
+            opacity: 0.6;
+            margin-top: 12px;
+            font-weight: 500;
+        }
+
+        .typing-indicator {
+            display: none;
+            align-items: center;
+            gap: 20px;
+            padding: 20px 28px;
+        }
+
+        .typing-dots {
+            display: flex;
+            gap: 8px;
+        }
+
+        .typing-dot {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, var(--accent-violet), var(--accent-blue));
+            animation: typingAnimation 1.6s infinite;
+            box-shadow: 0 4px 12px var(--shadow-violet);
+        }
+
+        .typing-dot:nth-child(2) {
+            animation-delay: 0.2s;
+        }
+
+        .typing-dot:nth-child(3) {
+            animation-delay: 0.4s;
+        }
+
+        @keyframes typingAnimation {
+            0%, 60%, 100% {
+                transform: translateY(0) scale(1);
+                opacity: 0.5;
+            }
+            30% {
+                transform: translateY(-12px) scale(1.2);
+                opacity: 1;
+            }
+        }
+
+        .input-container {
+            padding: 40px;
+            border-top: 1px solid var(--border-secondary);
+            background: linear-gradient(135deg, 
+                rgba(22, 33, 62, 0.3) 0%, 
+                rgba(26, 26, 46, 0.2) 100%);
+            backdrop-filter: blur(20px);
+        }
+
+        .input-wrapper {
+            display: flex;
+            align-items: flex-end;
+            gap: 16px;
+            background: linear-gradient(135deg, 
+                rgba(255, 255, 255, 0.08) 0%, 
+                rgba(255, 255, 255, 0.03) 100%);
+            border-radius: 24px;
+            padding: 12px;
+            border: 2px solid var(--border-secondary);
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            backdrop-filter: blur(40px);
+        }
+
+        .input-wrapper:focus-within {
+            border-color: var(--accent-violet);
+            box-shadow: 0 0 0 4px rgba(108, 92, 231, 0.1), 0 16px 48px rgba(108, 92, 231, 0.2);
+            background: linear-gradient(135deg, 
+                rgba(255, 255, 255, 0.12) 0%, 
+                rgba(255, 255, 255, 0.06) 100%);
+        }
+
+        .message-input {
+            flex: 1;
+            background: transparent;
+            border: none;
+            outline: none;
+            color: var(--text-primary);
+            padding: 18px 24px;
+            font-size: 16px;
+            resize: none;
+            max-height: 120px;
+            min-height: 24px;
+            font-weight: 400;
+        }
+
+        .message-input::placeholder {
+            color: var(--text-muted);
+            font-weight: 400;
+        }
+
+        .send-btn {
+            background: linear-gradient(135deg, var(--accent-violet) 0%, var(--accent-blue) 100%);
+            border: none;
+            color: white;
+            width: 56px;
+            height: 56px;
+            border-radius: 16px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            flex-shrink: 0;
+            position: relative;
+            overflow: hidden;
+            box-shadow: 0 8px 32px var(--shadow-violet);
+        }
+
+        .send-btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: radial-gradient(circle, rgba(255, 255, 255, 0.3) 0%, transparent 70%);
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+
+        .send-btn:hover:not(:disabled) {
+            transform: translateY(-3px) scale(1.05);
+            box-shadow: 0 20px 60px var(--shadow-violet);
+        }
+
+        .send-btn:hover:not(:disabled)::before {
+            opacity: 1;
+        }
+
+        .send-btn:disabled {
+            opacity: 0.4;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: 0 4px 16px rgba(108, 92, 231, 0.2);
+        }
+
+        .floating-orbs {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            pointer-events: none;
+            z-index: -1;
+        }
+
+        .orb {
+            position: absolute;
+            border-radius: 50%;
+            background: radial-gradient(circle, var(--accent-violet) 0%, transparent 70%);
+            opacity: 0.1;
+            animation: orbFloat 20s infinite linear;
+        }
+
+        .orb.blue {
+            background: radial-gradient(circle, var(--accent-blue) 0%, transparent 70%);
+        }
+
+        .orb.light-blue {
+            background: radial-gradient(circle, var(--accent-light-blue) 0%, transparent 70%);
+        }
+
+        @keyframes orbFloat {
+            from {
+                transform: translateY(100vh) translateX(0) rotate(0deg);
+                opacity: 0;
+            }
+            10% {
+                opacity: 0.1;
+            }
+            90% {
+                opacity: 0.1;
+            }
+            to {
+                transform: translateY(-10vh) translateX(100px) rotate(360deg);
+                opacity: 0;
+            }
+        }
+
+        .welcome-screen {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100%;
+            text-align: center;
+            color: var(--text-primary);
+            animation: welcomeFadeIn 1s ease-out;
+        }
+
+        @keyframes welcomeFadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(40px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .welcome-title {
+            font-size: 42px;
+            font-weight: 900;
+            margin-bottom: 20px;
+            background: linear-gradient(135deg, var(--accent-violet), var(--accent-blue), var(--accent-light-blue));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            animation: titleGlow 3s ease-in-out infinite alternate;
+        }
+
+        @keyframes titleGlow {
+            0% { filter: drop-shadow(0 0 20px rgba(108, 92, 231, 0.5)); }
+            100% { filter: drop-shadow(0 0 40px rgba(116, 185, 255, 0.8)); }
+        }
+
+        .welcome-subtitle {
+            font-size: 20px;
+            color: var(--text-secondary);
+            margin-bottom: 48px;
+            font-weight: 400;
+        }
+
+        .feature-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 24px;
+            max-width: 600px;
+        }
+
+        .feature-card {
+            background: linear-gradient(135deg, 
+                rgba(255, 255, 255, 0.05) 0%, 
+                rgba(255, 255, 255, 0.02) 100%);
+            padding: 28px;
+            border-radius: 20px;
+            border: 1px solid var(--border-secondary);
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
+            overflow: hidden;
+            backdrop-filter: blur(20px);
+        }
+
+        .feature-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, var(--accent-violet), var(--accent-blue));
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+
+        .feature-card:hover {
+            background: linear-gradient(135deg, 
+                rgba(108, 92, 231, 0.1) 0%, 
+                rgba(116, 185, 255, 0.05) 100%);
+            border-color: var(--accent-violet);
+            transform: translateY(-8px);
+            box-shadow: 0 20px 60px rgba(108, 92, 231, 0.2);
+        }
+
+        .feature-card:hover::before {
+            opacity: 0.03;
+        }
+
+        .feature-icon {
+            font-size: 32px;
+            margin-bottom: 16px;
+            filter: drop-shadow(0 4px 8px rgba(108, 92, 231, 0.3));
+        }
+
+        .feature-title {
+            font-weight: 700;
+            margin-bottom: 8px;
+            color: var(--text-primary);
+            font-size: 16px;
+        }
+
+        .feature-desc {
+            font-size: 14px;
+            color: var(--text-secondary);
+            line-height: 1.5;
+        }
+
+        @media (max-width: 768px) {
+            .sidebar {
+                position: absolute;
+                left: -340px;
+                height: 100%;
+                z-index: 100;
+            }
+
+            .sidebar.open {
+                transform: translateX(340px);
+            }
+
+            .main-chat {
+                width: 100%;
+            }
+
+            .message-content {
+                max-width: 85%;
+            }
+
+            .feature-grid {
+                grid-template-columns: 1fr;
+                gap: 16px;
+            }
+
+            .welcome-title {
+                font-size: 32px;
+            }
+        }
+
+        /* Pulse animation for active elements */
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.02); }
+        }
+
+        .pulse {
+            animation: pulse 2s infinite;
+        }
+    </style>
+</head>
+<body>
+    <div class="chat-container">
+        <div class="floating-orbs" id="orbs"></div>
+        
+        <div class="sidebar">
+            <div class="sidebar-header">
+                <h2 class="sidebar-title">Neural Conversations</h2>
+                <button class="new-chat-btn" onclick="startNewChat()">
+                    ✨ Initialize New Session
+                </button>
+            </div>
+            <div class="chat-history" id="chatHistory">
+                <div class="chat-item active">
+                    <div>🧠 Prime Session</div>
+                    <div style="font-size: 12px; opacity: 0.6; margin-top: 6px;">Active Now</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="main-chat">
+            <div class="chat-header">
+                <h1 class="chat-title">Quantum AI Interface</h1>
+                <div class="chat-controls">
+                    <button class="control-btn" onclick="clearChat()">🗑️ Purge</button>
+                    <button class="control-btn" onclick="exportChat()">📊 Export</button>
+                    <button class="control-btn" onclick="toggleSidebar()">☰ Menu</button>
+                </div>
+            </div>
+
+            <div class="messages-container" id="messagesContainer">
+                <div class="welcome-screen" id="welcomeScreen">
+                    <h2 class="welcome-title">Neural Network Interface</h2>
+                    <p class="welcome-subtitle">Experience next-generation AI conversation technology</p>
+                    <div class="feature-grid">
+                        <div class="feature-card">
+                            <div class="feature-icon">⚡</div>
+                            <div class="feature-title">Quantum Speed</div>
+                            <div class="feature-desc">Lightning-fast neural processing with real-time responses</div>
+                        </div>
+                        <div class="feature-card">
+                            <div class="feature-icon">🌌</div>
+                            <div class="feature-title">Cosmic Design</div>
+                            <div class="feature-desc">Ultra-modern interface with dynamic visual effects</div>
+                        </div>
+                        <div class="feature-card">
+                            <div class="feature-icon">🧠</div>
+                            <div class="feature-title">Advanced AI</div>
+                            <div class="feature-desc">Context-aware conversations with deep understanding</div>
+                        </div>
+                        <div class="feature-card">
+                            <div class="feature-icon">🎯</div>
+                            <div class="feature-title">Precision</div>
+                            <div class="feature-desc">Adaptive responses tailored to your needs</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="typing-indicator" id="typingIndicator">
+                    <div class="message-avatar ai-avatar">AI</div>
+                    <div class="typing-dots">
+                        <div class="typing-dot"></div>
+                        <div class="typing-dot"></div>
+                        <div class="typing-dot"></div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="input-container">
+                <div class="input-wrapper">
+                    <textarea 
+                        class="message-input" 
+                        id="messageInput" 
+                        placeholder="Enter your neural query..." 
+                        rows="1"
+                        onkeydown="handleKeyDown(event)"
+                        oninput="adjustTextareaHeight(this)"
+                    ></textarea>
+                    <button class="send-btn" id="sendBtn" onclick="sendMessage()">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                            <line x1="22" y1="2" x2="11" y2="13"></line>
+                            <polygon points="22,2 15,22 11,13 2,9 22,2"></polygon>
+                        </svg>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let messages = [];
+        let chatId = 0;
+        let isTyping = false;
+
+        // Initialize floating orbs
+        function createFloatingOrbs() {
+            const container = document.getElementById('orbs');
+            const orbTypes = ['', 'blue', 'light-blue'];
+            
+            for (let i = 0; i < 15; i++) {
+                const orb = document.createElement('div');
+                orb.className = `orb ${orbTypes[Math.floor(Math.random() * orbTypes.length)]}`;
+                orb.style.left = Math.random() * 100 + '%';
+                orb.style.width = orb.style.height = (20 + Math.random() * 80) + 'px';
+                orb.style.animationDelay = Math.random() * 20 + 's';
+                orb.style.animationDuration = (15 + Math.random() * 15) + 's';
+                container.appendChild(orb);
+            }
+        }
+
+        function adjustTextareaHeight(textarea) {
+            textarea.style.height = 'auto';
+            textarea.style.height = Math.min(textarea.scrollHeight, 120) + 'px';
+        }
+
+        function handleKeyDown(event) {
+            if (event.key === 'Enter' && !event.shiftKey) {
+                event.preventDefault();
+                sendMessage();
+            }
+        }
+
+        function addMessage(content, isUser = false) {
+            const welcomeScreen = document.getElementById('welcomeScreen');
+            if (welcomeScreen.style.display !== 'none') {
+                welcomeScreen.style.display = 'none';
+            }
+
+            const messagesContainer = document.getElementById('messagesContainer');
+            const messageDiv = document.createElement('div');
+            messageDiv.className = `message ${isUser ? 'user' : 'ai'}`;
+            
+            const now = new Date();
+            const timeString = now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+
+            messageDiv.innerHTML = `
+                <div class="message-avatar ${isUser ? 'user-avatar' : 'ai-avatar'}">
+                    ${isUser ? '👤' : '🤖'}
+                </div>
+                <div class="message-content">
+                    ${content}
+                    <div class="message-time">${timeString}</div>
+                </div>
+            `;
+
+            messagesContainer.appendChild(messageDiv);
+            
+            // Smooth scroll with animation
+            setTimeout(() => {
+                messagesContainer.scrollTo({
+                    top: messagesContainer.scrollHeight,
+                    behavior: 'smooth'
+                });
+            }, 100);
+
+            messages.push({ content, isUser, timestamp: now });
+        }
+
+        function showTypingIndicator() {
+            const indicator = document.getElementById('typingIndicator');
+            indicator.style.display = 'flex';
+            const messagesContainer = document.getElementById('messagesContainer');
+            setTimeout(() => {
+                messagesContainer.scrollTo({
+                    top: messagesContainer.scrollHeight,
+                    behavior: 'smooth'
+                });
+            }, 100);
+        }
+
+        function hideTypingIndicator() {
+            const indicator = document.getElementById('typingIndicator');
+            indicator.style.display = 'none';
+        }
+
+        async function simulateAIResponse(userMessage) {
+            showTypingIndicator();
+            
+            // Enhanced thinking time with randomization
+            const thinkingTime = 1500 + Math.random() * 2500;
+            await new Promise(resolve => setTimeout(resolve, thinkingTime));
+            
+            hideTypingIndicator();
+
+            // More sophisticated AI responses
+            const responses = [
+                `Fascinating query regarding "${userMessage.substring(0, 25)}...". My neural networks have processed your input through multiple layers of analysis. Here's my comprehensive assessment based on current data patterns and contextual understanding.`,
+                
+                `Your inquiry about ${userMessage.toLowerCase().substring(0, 30)}... has triggered several interesting computational pathways. Let me synthesize the most relevant information from my knowledge base and provide you with actionable insights.`,
+                
+                `Excellent question! This touches on complex interconnected concepts that require multi-dimensional analysis. After processing your request through my advanced reasoning modules, here's what the data reveals.`,
+                
+                `I've analyzed your request through my quantum processing cores. The topic of "${userMessage.substring(0, 20)}..." involves multiple variables and considerations. Here's my detailed analysis with practical applications.`,
+                
+                `Your neural query has been processed through advanced pattern recognition algorithms. This is indeed a nuanced subject that benefits from both analytical and intuitive approaches. Let me break this down systematically.`
+            ];
+
+            const response = responses[Math.floor(Math.random() * responses.length)];
+            addMessage(response, false);
+            
+            // Add subtle animation effect to the send button
+            const sendBtn = document.getElementById('sendBtn');
+            sendBtn.classList.add('pulse');
+            setTimeout(() => sendBtn.classList.remove('pulse'), 1000);
+        }
+
+        async function sendMessage() {
+            const input = document.getElementById('messageInput');
+            const content = input.value.trim();
+            
+            if (!content || isTyping) return;
+
+            isTyping = true;
+            const sendBtn = document.getElementById('sendBtn');
+            sendBtn.disabled = true;
+
+            // Add user message with enhanced animation
+            addMessage(content, true);
+            input.value = '';
+            input.style.height = 'auto';
+
+            // Simulate AI processing
+            await simulateAIResponse(content);
+
+            isTyping = false;
+            sendBtn.disabled = false;
+            input.focus();
+        }
+
+        function startNewChat() {
+            messages = [];
+            chatId++;
+            const messagesContainer = document.getElementById('messagesContainer');
+            const messageElements = messagesContainer.querySelectorAll('.message');
+            messageElements.forEach(el => el.remove());
+            
+            const welcomeScreen = document.getElementById('welcomeScreen');
+            welcomeScreen.style.display = 'flex';
+            
+            // Enhanced chat history management
+            const chatHistory = document.getElementById('chatHistory');
+            const existingActive = chatHistory.querySelector('.active');
+            if (existingActive) existingActive.classList.remove('active');
+            
+            const newChatItem = document.createElement('div');
+            newChatItem.className = 'chat-item active';
+            newChatItem.innerHTML = `
+                <div>🧠 Neural Session ${chatId}</div>
+                <div style="font-size: 12px; opacity: 0.6; margin-top: 6px;">Active Now</div>
+            `;
+            
+            // Add click animation
+            newChatItem.addEventListener('click', function() {
+                this.style.transform = 'scale(0.98)';
+                setTimeout(() => {
+                    this.style.transform = '';
+                }, 150);
+            });
+            
+            chatHistory.appendChild(newChatItem);
+        }
+
+        function clearChat() {
+            // Enhanced confirmation dialog
+            if (confirm('🗑️ Purge current neural session? This action cannot be undone.')) {
+                const messagesContainer = document.getElementById('messagesContainer');
+                const messageElements = messagesContainer.querySelectorAll('.message');
+                
+                // Animate messages out
+                messageElements.forEach((el, index) => {
+                    setTimeout(() => {
+                        el.style.animation = 'messageSlideOut 0.3s ease-in forwards';
+                        setTimeout(() => el.remove(), 300);
+                    }, index * 50);
+                });
+                
+                setTimeout(() => {
+                    document.getElementById('welcomeScreen').style.display = 'flex';
+                    messages = [];
+                }, messageElements.length * 50 + 300);
+            }
+        }
+
+        function exportChat() {
+            const chatData = {
+                title: `Neural Session ${chatId}`,
+                messages: messages,
+                timestamp: new Date().toISOString(),
+                chatId: chatId,
+                metadata: {
+                    totalMessages: messages.length,
+                    userMessages: messages.filter(m => m.isUser).length,
+                    aiMessages: messages.filter(m => !m.isUser).length,
+                    sessionDuration: messages.length > 0 ? 
+                        new Date(messages[messages.length - 1].timestamp) - new Date(messages[0].timestamp) : 0
+                }
+            };
+            
+            const dataStr = JSON.stringify(chatData, null, 2);
+            const dataBlob = new Blob([dataStr], { type: 'application/json' });
+            
+            const link = document.createElement('a');
+            link.href = URL.createObjectURL(dataBlob);
+            link.download = `neural-session-${chatId}-${new Date().toISOString().split('T')[0]}.json`;
+            
+            // Add visual feedback
+            link.style.display = 'none';
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            
+            // Show export confirmation
+            const exportBtn = document.querySelector('.control-btn');
+            const originalText = exportBtn.innerHTML;
+            exportBtn.innerHTML = '✅ Exported';
+            exportBtn.style.background = 'linear-gradient(135deg, #00b894, #00cec9)';
+            setTimeout(() => {
+                exportBtn.innerHTML = originalText;
+                exportBtn.style.background = '';
+            }, 2000);
+        }
+
+        function toggleSidebar() {
+            const sidebar = document.querySelector('.sidebar');
+            sidebar.classList.toggle('open');
+            
+            // Add backdrop on mobile
+            if (window.innerWidth <= 768) {
+                if (sidebar.classList.contains('open')) {
+                    const backdrop = document.createElement('div');
+                    backdrop.id = 'sidebar-backdrop';
+                    backdrop.style.cssText = `
+                        position: fixed;
+                        top: 0;
+                        left: 0;
+                        width: 100%;
+                        height: 100%;
+                        background: rgba(0, 0, 0, 0.5);
+                        z-index: 99;
+                        backdrop-filter: blur(5px);
+                    `;
+                    backdrop.onclick = toggleSidebar;
+                    document.body.appendChild(backdrop);
+                } else {
+                    const backdrop = document.getElementById('sidebar-backdrop');
+                    if (backdrop) backdrop.remove();
+                }
+            }
+        }
+
+        // Initialize everything
+        document.addEventListener('DOMContentLoaded', function() {
+            createFloatingOrbs();
+            document.getElementById('messageInput').focus();
+            
+            // Add dynamic title effect
+            const title = document.querySelector('.welcome-title');
+            if (title) {
+                let colorIndex = 0;
+                const colors = ['#6c5ce7', '#74b9ff', '#a8e6cf', '#fd79a8', '#fdcb6e'];
+                setInterval(() => {
+                    title.style.background = `linear-gradient(135deg, ${colors[colorIndex]}, ${colors[(colorIndex + 1) % colors.length]})`;
+                    title.style.webkitBackgroundClip = 'text';
+                    title.style.webkitTextFillColor = 'transparent';
+                    colorIndex = (colorIndex + 1) % colors.length;
+                }, 3000);
+            }
+        });
+
+        // Add CSS animation for message slide out
+        const style = document.createElement('style');
+        style.textContent = `
+            @keyframes messageSlideOut {
+                from {
+                    opacity: 1;
+                    transform: translateY(0) scale(1);
+                }
+                to {
+                    opacity: 0;
+                    transform: translateY(-30px) scale(0.95);
+                }
+            }
+        `;
+        document.head.appendChild(style);
+
+        // Enhanced auto-resize textarea
+        document.getElementById('messageInput').addEventListener('input', function() {
+            adjustTextareaHeight(this);
+            
+            // Add typing animation effect
+            const inputWrapper = document.querySelector('.input-wrapper');
+            inputWrapper.style.boxShadow = '0 0 0 4px rgba(108, 92, 231, 0.1), 0 16px 48px rgba(108, 92, 231, 0.2)';
+            
+            clearTimeout(this.typingTimer);
+            this.typingTimer = setTimeout(() => {
+                inputWrapper.style.boxShadow = '';
+            }, 1000);
+        });
+
+        // Add smooth scroll behavior to chat history
+        document.getElementById('chatHistory').addEventListener('wheel', function(e) {
+            e.preventDefault();
+            this.scrollBy({
+                top: e.deltaY,
+                behavior: 'smooth'
+            });
+        });
+    </script>
+</body>
+</html>
